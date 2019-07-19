@@ -67,8 +67,8 @@ CREATE TABLE Review
 (
     passenger_ID varchar(255),
     rid int,
-    shopping int,
-    connection_speed int,
+    shopping int NOT NULL,
+    connection_speed int NOT NULL,
     comment text,
     approver_ID varchar(255),
     approval_status varchar(255),
