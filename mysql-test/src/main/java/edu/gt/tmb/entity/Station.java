@@ -65,6 +65,10 @@ public class Station {
 	}
 
 	public String toString() {
+		return name;
+	}
+	
+	public String print() {
 		return "{Station: " + name + ", "+ status +", "+ stateProvince +", "+ address +", "+ zipcode +", "+ city + "}";
 	}
 }
