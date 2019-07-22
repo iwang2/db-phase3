@@ -8,14 +8,12 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.TextField;
 import sun.management.snmp.util.SnmpTableCache;
 
 import javax.xml.soap.Text;
@@ -190,6 +188,12 @@ public class GUI2 extends Application {
 
         Button view_reviews = new Button();
         view_reviews.setText("View Reviews");
+        view_reviews.setOnAction(e -> {
+            Stage stage = (Stage) view_reviews.getScene().getWindow();
+            stage.setScene(viewReviews());
+            stage.setTitle(currentUser.getFirstName() + " " +
+                    currentUser.getLastName() + "'s Reviews");
+        });
 
         Button view_trips = new Button();
         view_trips.setText("View Trips");
@@ -261,6 +265,39 @@ public class GUI2 extends Application {
                 error, submit);
 
         return new Scene(vBox);
+    }
+
+    private Scene viewReviews() {
+        List<Review> reviewList = reviewDao.getReviews(currentUser.getId());
+        ObservableList<Review> reviews;
+        if (reviewList != null) {
+            reviews = FXCollections.observableList(reviewList);
+        } else reviews = null;
+
+        TableView table = new TableView();
+        TableColumn idCol = new TableColumn("ID");
+        idCol.setCellValueFactory(
+                new PropertyValueFactory<Review, Integer>("id"));
+        TableColumn stationCol = new TableColumn("Station");
+        stationCol.setCellValueFactory(
+                new PropertyValueFactory<Review, String>("station"));
+        TableColumn shoppingCol = new TableColumn("Shopping");
+        shoppingCol.setCellValueFactory(
+                new PropertyValueFactory<Review, Integer>("shopping"));
+        TableColumn connectionCol = new TableColumn("Connection\nSpeed");
+        connectionCol.setCellValueFactory(
+                new PropertyValueFactory<Review, Integer>("connection"));
+        TableColumn commentCol = new TableColumn("Comment");
+        commentCol.setCellValueFactory(
+                new PropertyValueFactory<Review, String>("comment"));
+        TableColumn statusCol = new TableColumn("Approval\nStatus");
+        statusCol.setCellValueFactory(
+                new PropertyValueFactory<Review, String>("status"));
+
+        table.setItems(reviews);
+        table.getColumns().addAll(idCol, stationCol, shoppingCol,
+                connectionCol, commentCol, statusCol);
+        return new Scene(table);
     }
 
     private void adminLanding() {
