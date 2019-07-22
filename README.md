@@ -5,13 +5,16 @@
 - Registration
 - Passenger Landing
 - Leave Review
+- View Review
 
 ## Completed GUIs
-- View Reviews
 - Edit Review
 
 ## Started GUIs
 - Station Info
 
 ## Notes
-- **View Reviews** - hyperlinks started; not really working yet + not tested
+- Edit Review needs to input the  values into the textfields
+
+## Other To-Dos
+- set default review status to pending in the create_table

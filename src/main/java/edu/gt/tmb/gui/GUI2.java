@@ -283,7 +283,7 @@ public class GUI2 extends Application {
         TableView table = new TableView();
         TableColumn idCol = new TableColumn("ID");
         idCol.setCellValueFactory(
-                new PropertyValueFactory<Review, Integer>("id"));
+                new PropertyValueFactory<Review, Integer>("rid"));
         idCol.setCellFactory(new Callback<TableColumn, TableCell>() {
             @Override
             public TableCell call(TableColumn param) {
@@ -312,7 +312,7 @@ public class GUI2 extends Application {
 
         TableColumn stationCol = new TableColumn("Station");
         stationCol.setCellValueFactory(
-                new PropertyValueFactory<Review, String>("station"));
+                new PropertyValueFactory<Review, String>("stationName"));
 
         TableColumn shoppingCol = new TableColumn("Shopping");
         shoppingCol.setCellValueFactory(
@@ -320,7 +320,7 @@ public class GUI2 extends Application {
 
         TableColumn connectionCol = new TableColumn("Connection\nSpeed");
         connectionCol.setCellValueFactory(
-                new PropertyValueFactory<Review, Integer>("connection"));
+                new PropertyValueFactory<Review, Integer>("connectionSpeed"));
 
         TableColumn commentCol = new TableColumn("Comment");
         commentCol.setCellValueFactory(
@@ -329,11 +329,12 @@ public class GUI2 extends Application {
 
         TableColumn statusCol = new TableColumn("Approval\nStatus");
         statusCol.setCellValueFactory(
-                new PropertyValueFactory<Review, String>("status"));
+                new PropertyValueFactory<Review, String>("approvalStatus"));
 
         table.setItems(reviews);
         table.getColumns().addAll(idCol, stationCol, shoppingCol,
                 connectionCol, commentCol, statusCol);
+
         return new Scene(table);
     }
 
