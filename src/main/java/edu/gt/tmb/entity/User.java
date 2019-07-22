@@ -16,6 +16,17 @@ public class User {
 	private String password;
 	private String passengerEmail;
 
+	public User() {
+    }
+
+	public User (String id, String first, String minit, String last, String password) {
+	    this.id = id;
+	    this.firstName = first;
+	    this.minit = minit;
+	    this.lastName = last;
+	    this.password = password;
+    }
+
 	public String getId() {
 		return id;
 	}
