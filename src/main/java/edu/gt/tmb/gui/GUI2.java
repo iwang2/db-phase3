@@ -1,9 +1,14 @@
 package edu.gt.tmb.gui;
 
 import edu.gt.tmb.dao.*;
+import edu.gt.tmb.entity.Review;
+import edu.gt.tmb.entity.Station;
 import edu.gt.tmb.entity.User;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
+import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -11,6 +16,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.TextField;
+import sun.management.snmp.util.SnmpTableCache;
+
+import javax.xml.soap.Text;
+import java.util.List;
 
 public class GUI2 extends Application {
 
@@ -173,6 +182,11 @@ public class GUI2 extends Application {
     private Scene passengerLanding() {
         Button leave_review = new Button();
         leave_review.setText("Leave Review");
+        leave_review.setOnAction(e -> {
+            Stage stage = (Stage) leave_review.getScene().getWindow();
+            stage.setScene(leaveReview());
+            stage.setTitle("Leave a Review");
+        });
 
         Button view_reviews = new Button();
         view_reviews.setText("View Reviews");
@@ -193,6 +207,58 @@ public class GUI2 extends Application {
         vBox.getChildren().addAll(leave_review, view_reviews, view_trips,
                 buy_card, go_on_trip, edit_profile);
         vBox.setAlignment(Pos.CENTER);
+
+        return new Scene(vBox);
+    }
+
+    private Scene leaveReview() {
+        List<Station> stationList = stationDao.orderStation();
+        ObservableList<Station> stations;
+        if (stationList != null) {
+            stations = FXCollections.observableList(stationList);
+        } else stations = null;
+        ComboBox<Station> comboBox = new ComboBox<>(stations);
+
+        Label shopping_label = new Label();
+        shopping_label.setText("Shopping (1 - 5):");
+        TextField shopping_text = new TextField();
+
+        Label connection_label = new Label();
+        connection_label.setText("Connection Speed (1 - 5):");
+        TextField connection_text = new TextField();
+
+        Label comment_label = new Label();
+        comment_label.setText("Comment:");
+        TextField comment_text = new TextField();
+
+        Label error = new Label();
+
+        Button submit = new Button();
+        submit.setText("Submit Review");
+        submit.setOnAction(e -> {
+            try {
+                int shopping = Integer.parseInt(shopping_text.getText());
+                int connection = Integer.parseInt(connection_text.getText());
+                Station station = comboBox.getValue();
+                if (station == null) {
+                    error.setText("Please select a station.");
+                } else {
+                    Review review = new Review(station.getName(),
+                            shopping, connection,
+                            comment_text.getText(), currentUser.getId());
+                    reviewDao.addReview(review);
+                }
+            } catch (NumberFormatException n) {
+                error.setText("Please ensure that valid ratings have been entered");
+            }
+        });
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(comboBox,
+                shopping_label, shopping_text,
+                connection_label, connection_text,
+                comment_label, comment_text,
+                error, submit);
 
         return new Scene(vBox);
     }

@@ -18,6 +18,18 @@ public class Review {
 	private Date editTimestamp;
 	private String stationName;
 
+	public Review() {
+    }
+
+	public Review(String name, int shopping, int connection,
+                   String comment, String passengerId) {
+	    this.stationName = name;
+	    this.shopping = shopping;
+	    this.connectionSpeed = connection;
+	    this.comment = comment;
+	    this.passengerId = passengerId;
+    }
+
 	public int getShopping() {
 		return shopping;
 	}
