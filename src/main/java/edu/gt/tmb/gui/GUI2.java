@@ -313,6 +313,30 @@ public class GUI2 extends Application {
         TableColumn stationCol = new TableColumn("Station");
         stationCol.setCellValueFactory(
                 new PropertyValueFactory<Review, String>("stationName"));
+        stationCol.setCellFactory(new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn param) {
+                TableCell cell = new TableCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(item != null) {
+                            setText(item.toString());
+                        }
+                    }
+                };
+                cell.setOnMouseClicked(e -> {
+                    if(!cell.isEmpty()) {
+                        String station = (String) cell.getItem();
+                        selectedStation = stationDao.getStation(station);
+                        Stage stage = (Stage) cell.getScene().getWindow();
+                        stage.setScene(stationInfo());
+                        stage.setTitle(station + "(Status: " + selectedStation.getStatus() + ")");
+                    }
+                });
+                return cell;
+            }
+        });
 
         TableColumn shoppingCol = new TableColumn("Shopping");
         shoppingCol.setCellValueFactory(
