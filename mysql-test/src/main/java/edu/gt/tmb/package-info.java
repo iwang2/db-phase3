@@ -1,1 +1,1 @@
-package edu.gt.tmb;
+package edu.gt.tmb.gui;

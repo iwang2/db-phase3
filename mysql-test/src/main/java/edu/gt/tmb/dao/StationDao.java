@@ -13,17 +13,23 @@ import edu.gt.tmb.entity.Station;
 import edu.gt.tmb.entity.User;
 
 public class StationDao {
-	public String orderStation() {
+	public List<Station> orderStation() {
 		Connection connection = ConnectionFactory.getConnection();
         try {
             Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT name FROM STATION ORDER BY name ASC;");
-            if(rs.next())
+            ResultSet rs = stmt.executeQuery("SELECT * FROM STATION ORDER BY name ASC;");
+            List<Station> stations = new ArrayList<>();
+            while(rs.next())
             {
-                Station user = new Station();
-                user.setName( rs.getString("name") );
+                Station station = new Station();
+                station.setName( rs.getString("name") );
+                station.setStatus( rs.getString("status") );
+                station.setStateProvince(rs.getString("state_province"));
+                station.setAddress( rs.getString("address") ); //these are the database fields from the actual database attributes
+                station.setZipcode( rs.getInt("zipcode") );
+                station.setCity(rs.getString("city"));
     
-                return user.getName();
+                stations.add(station);// user.getName();
             }
             
         } catch (SQLException ex) {

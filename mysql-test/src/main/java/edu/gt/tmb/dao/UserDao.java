@@ -174,7 +174,7 @@ public class UserDao {
 		Connection connection = ConnectionFactory.getConnection();
         try {
             Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM admin WHERE id=" + user.getId());
+            ResultSet rs = stmt.executeQuery("SELECT * FROM admin WHERE id='" + user.getId()+"'");
             if(rs.next())
             {
                 

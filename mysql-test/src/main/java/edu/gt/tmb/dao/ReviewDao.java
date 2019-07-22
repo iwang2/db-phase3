@@ -1,6 +1,7 @@
 package edu.gt.tmb.dao;
 
 import java.sql.Connection;
+import java.util.Random;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.gt.tmb.entity.Review;
-import edu.gt.tmb.entity.Station;
-import edu.gt.tmb.entity.User;
 
 public class ReviewDao {
 	public List<Review> getReviews(String passengerId) {
@@ -19,7 +18,7 @@ public class ReviewDao {
 	            Statement stmt = connection.createStatement();
 	            ResultSet rs = stmt.executeQuery("SELECT * FROM review WHERE passenger_ID='" + passengerId+"'");
 	            List<Review> reviews = new ArrayList<>();
-	            if(rs.next())
+	            while(rs.next())
 	            {
 	            	Review review = new Review();
 	                review.setPassengerId( rs.getString("passenger_id") );
@@ -73,11 +72,11 @@ public class ReviewDao {
     return null;
 	}
 	
-	public List<Review> orderReview(String columnName) {
+	public List<Review> orderReview(String columnName, String passengerID) {
 		Connection connection = ConnectionFactory.getConnection();
         try {
             Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM Review ORDER BY "+columnName+" ASC");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM Review WHERE passenger_id = '"+passengerID+"'ORDER BY "+columnName+" ASC");
             List<Review> reviews = new ArrayList<>();
             while(rs.next())
             {
@@ -101,12 +100,13 @@ public class ReviewDao {
         return null;
 	}
 	
-	public Review getReviewName(int rid, String passId) {
+	public List<Review> getReviewName(int rid, String passId) {
 	    Connection connection = ConnectionFactory.getConnection();
 	        try {
 	            Statement stmt = connection.createStatement();
 	            ResultSet rs = stmt.executeQuery("SELECT * FROM review WHERE passenger_id = '"+passId+"' AND rid = '" + rid+"'");
-	            if(rs.next())
+	            List<Review> reviews = new ArrayList<>();
+	            while(rs.next())
 	            {
 	            	Review review = new Review();
 	                
@@ -120,9 +120,9 @@ public class ReviewDao {
 	                review.setEditTimestamp(rs.getDate("edit_timestamp"));
 	                review.setRid(rs.getInt("rid"));
 	                //review.setStationName(rs.getString("station_name"));
-	                return review;
+	                reviews.add(review);// review;
 	            }
-	            
+	            return reviews;
 	        } catch (SQLException ex) {
 	            ex.printStackTrace();
 	        }
@@ -199,15 +199,17 @@ public class ReviewDao {
 	
 	public boolean addReview(Review review) {
 		//Connector connector = new Connector();
-		int rand = 0;
+		//int rand = 0;
 	    Connection connection = ConnectionFactory.getConnection();
 	    try {
 	        PreparedStatement ps = connection.prepareStatement("INSERT INTO REVIEW (passenger_id, shopping, connection_speed, comment, station_name, rid) VALUES (?,?,?,?,?,?)");
 	        Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(rid) FROM review WHERE passenger_ID='" + review.getPassengerId()+"'");
-            if(rs.next()) {
-            	rand = rs.getInt(1);
-            }
+//            ResultSet rs = stmt.executeQuery("SELECT COUNT(rid) FROM review WHERE passenger_ID='" + review.getPassengerId()+"'");
+//            if(rs.next()) {
+//            	rand = rs.getInt(1); //how to get review id because if you count number of reviews, when you delete one you get an error for duplicate primary key
+//            }
+	        Random rand = new Random();
+	        //java.Math.Random(1000000000);
 	        ps.setString(1, review.getPassengerId());
 	        //ps.setString(2, review.getStatus());
 	        ps.setInt(2, review.getShopping());
@@ -215,7 +217,7 @@ public class ReviewDao {
 	        ps.setString(4,review.getComment());
 	        ps.setString(5,review.getStationName());
 	        // ps.setInt()
-	        ps.setInt(6, rand + 1 );
+	        ps.setInt(6, rand.nextInt(1000000) );
 
 	        int i = ps.executeUpdate();
 	      if(i == 1) { //how many rows were updated
@@ -273,7 +275,7 @@ public class ReviewDao {
 	    Connection connection = ConnectionFactory.getConnection();
 	        try {
 	            Statement stmt = connection.createStatement();
-	            ResultSet rs = stmt.executeQuery("CREATE VIEW pending_reviews AS SELECT passenger_id, station_name, shopping, connection_speed, comment FROM REVIEW WHERE approval_status = '" + status +"'");
+	            ResultSet rs = stmt.executeQuery("SELECT passenger_id, station_name, shopping, connection_speed, comment FROM REVIEW WHERE approval_status = '" + status +"'");
 	            List<Review> reviews = new ArrayList<>();
 	            while(rs.next())
 	            {

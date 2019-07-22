@@ -4,42 +4,46 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import edu.gt.tmb.entity.Line;
-import edu.gt.tmb.entity.User;
 
 public class LineDao {
-	public String orderLine() {
+	public List<Line> orderLine() {
 		Connection connection = ConnectionFactory.getConnection();
         try {
             Statement stmt = connection.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT name FROM LINE ORDER BY line ASC");
-            if(rs.next())
+            ResultSet rs = stmt.executeQuery("SELECT * FROM LINE ORDER BY name ASC");
+            List<Line> lines = new ArrayList<>();
+            while(rs.next())
             {
                 Line user = new Line();
                 user.setName( rs.getString("name") );
     
-                return user.getName();
+                lines.add(user); //user.getName();
             }
-            
+            return lines;
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
         return null;
 	}
 	
-	public Line getLine(String name) {
+	public List<Line> getLine(String name) {
 		Connection connection = ConnectionFactory.getConnection();
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT name FROM LINE WHERE name = '" + name + "'");
-            if(rs.next())
+            List<Line> lists = new ArrayList<>();
+            while(rs.next())
             {
                 Line user = new Line();
                 user.setName( rs.getString("name") );
                 
-                return user;
+                lists.add(user);
             }
+            return lists;
             
         } catch (SQLException ex) {
             ex.printStackTrace();

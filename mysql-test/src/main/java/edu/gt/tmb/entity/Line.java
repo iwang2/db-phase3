@@ -12,9 +12,13 @@ public class Line {
 		this.name = name;
 	}
 
+	//@Override
+	public String print() {
+		return "Line [name=" + name + "]";
+	}
 	@Override
 	public String toString() {
-		return "Line [name=" + name + "]";
+		return name;
 	}
 
 }
