@@ -38,7 +38,34 @@ public class ReviewDao {
 	        }
 	    return null;
 	}
-	
+
+	public List<Review> getStationReviews(String name) {
+        Connection connection = ConnectionFactory.getConnection();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM review WHERE station_name='" + name + "'");
+            List<Review> reviews = new ArrayList<>();
+            while(rs.next())
+            {
+                Review review = new Review();
+                review.setPassengerId( rs.getString("passenger_id") );
+                review.setApprovalStatus( rs.getString("approval_status") );
+                review.setApproverId(rs.getString("approver_id"));
+                review.setComment( rs.getString("comment") ); //these are the database fields from the actual database attributes
+                review.setConnectionSpeed( rs.getInt("connection_speed") );
+                review.setShopping( rs.getInt("shopping") );
+                review.setEditTimestamp(rs.getDate("edit_timestamp"));
+                review.setRid(rs.getInt("rid"));
+                review.setStationName(rs.getString("station_name"));
+                reviews.add(review);
+            }
+            return reviews;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
 	public List<Review> getAllReviews() {
 		Connection connection = ConnectionFactory.getConnection();
         try { 
@@ -58,11 +85,7 @@ public class ReviewDao {
                 review.setRid(rs.getInt("rid"));
                 review.setShopping( rs.getInt("shopping") );
                 review.setStationName(rs.getString("station_name"));
-                
-                
-                
-                
-                //return user;
+
                 reviews.add(review);
             }
             return reviews;
@@ -128,8 +151,7 @@ public class ReviewDao {
 	        }
 	    return null;
 	}
-	
-	
+
 	public boolean deleteReview(int rid) {
 		//Connector connector = new Connector();
 	    Connection connection = ConnectionFactory.getConnection();
@@ -187,7 +209,6 @@ public class ReviewDao {
 	            ResultSet rs = stmt.executeQuery("SELECT AVG("+columnName+") FROM REVIEW WHERE approval_status = '"+approval + "' AND station_name = '" + stationName+"'");
 	            if(rs.next())
 	            {
-//	            	
 	            	return rs.getInt(1);
 	            }
 	            
@@ -229,6 +250,7 @@ public class ReviewDao {
 	    return false;
 
 	}
+
 	public boolean updateReview(Review review) {//user you are editing 
 	    Connection connection = ConnectionFactory.getConnection();
 	    try {

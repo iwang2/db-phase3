@@ -8,10 +8,10 @@
 - View Review
 
 ## Completed GUIs
-- Edit Review
+- Edit Review (submit review button incomplete)
+- Station Info (line linking incomplete)
 
 ## Started GUIs
-- Station Info
 
 ## Notes
 - Edit Review needs to input the  values into the textfields

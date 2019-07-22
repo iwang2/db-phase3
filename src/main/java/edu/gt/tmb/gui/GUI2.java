@@ -274,7 +274,8 @@ public class GUI2 extends Application {
     }
 
     private Scene viewReviews() {
-        List<Review> reviewList = reviewDao.getReviews(currentUser.getId());
+        List<Review> reviewList =
+                reviewDao.getReviews(currentUser.getId());
         ObservableList<Review> reviews;
         if (reviewList != null) {
             reviews = FXCollections.observableList(reviewList);
@@ -416,31 +417,51 @@ public class GUI2 extends Application {
         lines.setText("Lines:");
 
         Label shopping = new Label();
-        shopping.setText("Average Shopping: ");
+        shopping.setText("Average Shopping: " +
+                reviewDao.reviewAverage(
+                        "approved", selectedStation.getName(),
+                        "shopping"
+                ));
 
         Label connection = new Label();
-        connection.setText("Average Connection Speed: ");
+        connection.setText("Average Connection Speed: " +
+                reviewDao.reviewAverage(
+                        "approved", selectedStation.getName(),
+                        "connection_speed"
+                ));
 
         Label reviews_label = new Label();
-        reviews_label.setText("REVIEWS");
+        reviews_label.setText("\nREVIEWS");
+
+        List<Review> reviewList =
+                reviewDao.getStationReviews(selectedStation.getName());
+        ObservableList<Review> reviews =
+                FXCollections.observableList(reviewList);
 
         TableView table = new TableView();
         TableColumn userCol = new TableColumn("User");
         userCol.setCellValueFactory(
-                new PropertyValueFactory<Review, String>("user"));
+                new PropertyValueFactory<Review, String>("passengerId"));
         userCol.setSortable(false);
+
         TableColumn shoppingCol = new TableColumn("Shopping");
         shoppingCol.setCellValueFactory(
                 new PropertyValueFactory<Review, Integer>("shopping"));
         shoppingCol.setSortable(false);
+
         TableColumn connectionCol = new TableColumn("Connection\nSpeed");
         connectionCol.setCellValueFactory(
-                new PropertyValueFactory<Review, Integer>("connection"));
+                new PropertyValueFactory<Review, Integer>("connectionSpeed"));
         connectionCol.setSortable(false);
+
         TableColumn commentCol = new TableColumn("Comment");
         commentCol.setCellValueFactory(
                 new PropertyValueFactory<Review, String>("comment"));
         commentCol.setSortable(false);
+
+        table.setItems(reviews);
+        table.getColumns().addAll(userCol, shoppingCol,
+                connectionCol, commentCol);
 
         VBox vBox = new VBox();
         vBox.getChildren().addAll(address, lines,
