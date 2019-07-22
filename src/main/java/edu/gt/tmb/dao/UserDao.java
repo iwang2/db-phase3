@@ -71,8 +71,8 @@ public class UserDao {
 	        ps.setString(2, user.getFirstName());
 	        ps.setString(4, user.getLastName());
 	        ps.setString(3,user.getMinit());
-	        ps.setString(5, user.getPassword() );
-	        ps.setString(6, user.getPassengerEmail() );
+	        ps.setString(5, user.getPassengerEmail());
+	        ps.setString(6, user.getPassword());
 	        int i = ps.executeUpdate();
 	      if(i == 1) { //how many rows were updated
 	        return true;

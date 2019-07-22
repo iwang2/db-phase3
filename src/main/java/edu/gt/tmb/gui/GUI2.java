@@ -3,6 +3,7 @@ package edu.gt.tmb.gui;
 import edu.gt.tmb.dao.*;
 import edu.gt.tmb.entity.User;
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -125,6 +126,37 @@ public class GUI2 extends Application {
         conf_password_label.setText("Confirm password:");
         TextField conf_password_text = new TextField();
 
+        Label error = new Label();
+
+        Button register = new Button();
+        register.setText("Register");
+        register.setOnAction(e -> {
+            if (first_text.getText().equals("") ||
+                    last_text.getText().equals("") ||
+                    email_text.getText().equals("") ||
+                    userid_text.getText().equals("") ||
+                    password_text.getText().equals("")) {
+                error.setText("All fields are required except the middle initial.");
+            } else if (!password_text.getText().equals(conf_password_text.getText())) {
+                error.setText("Passwords do not match.");
+            } else if (password_text.getText().length() < 8) {
+                error.setText("Passwords must be at least 8 characters.");
+            } else {
+                User user = new User(userid_text.getText(),
+                        first_text.getText(), mi_text.getText(), last_text.getText(),
+                        password_text.getText());
+                user.setPassengerEmail(email_text.getText());
+                if (userDao.addUser(user)) {
+                    Stage stage = (Stage) register.getScene().getWindow();
+                    stage.setScene(passengerLanding());
+                    stage.setTitle("Welcome " + currentUser.getFirstName()
+                            + " " + currentUser.getLastName());
+                } else {
+                    error.setText("User ID must be unique.");
+                }
+            }
+        });
+
         VBox vbox = new VBox();
         vbox.getChildren().addAll(
                 first_label, first_text,
@@ -133,7 +165,8 @@ public class GUI2 extends Application {
                 email_label, email_text,
                 userid_label, userid_text,
                 password_label, password_text,
-                conf_password_label, conf_password_text);
+                conf_password_label, conf_password_text,
+                error, register);
         return new Scene(vbox);
     }
 
@@ -156,16 +189,12 @@ public class GUI2 extends Application {
         Button edit_profile = new Button();
         edit_profile.setText("Edit Profile");
 
-        VBox left = new VBox();
-        left.getChildren().addAll(leave_review, view_reviews, view_trips);
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(leave_review, view_reviews, view_trips,
+                buy_card, go_on_trip, edit_profile);
+        vBox.setAlignment(Pos.CENTER);
 
-        VBox right = new VBox();
-        right.getChildren().addAll(buy_card, go_on_trip, edit_profile);
-
-        HBox hbox = new HBox();
-        hbox.getChildren().addAll(left, right);
-
-        return new Scene(hbox);
+        return new Scene(vBox);
     }
 
     private void adminLanding() {
