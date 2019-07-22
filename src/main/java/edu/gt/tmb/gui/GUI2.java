@@ -1,6 +1,7 @@
 package edu.gt.tmb.gui;
 
 import edu.gt.tmb.dao.*;
+import edu.gt.tmb.entity.Line;
 import edu.gt.tmb.entity.Review;
 import edu.gt.tmb.entity.Station;
 import edu.gt.tmb.entity.User;
@@ -14,6 +15,7 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.util.Callback;
 import sun.management.snmp.util.SnmpTableCache;
 
 import javax.xml.soap.Text;
@@ -24,7 +26,6 @@ public class GUI2 extends Application {
     private UserDao userDao;
     private StationDao stationDao;
     private LineDao lineDao;
-    private User currentUser;
     private ReviewDao reviewDao;
     private AdminAddLineDao adminAddLineDao;
     private AdminAddStationDao adminAddStationDao;
@@ -32,7 +33,9 @@ public class GUI2 extends Application {
     private StationOnLineDao stationOnLineDao;
     private TripDao tripDao;
 
-    private Scene scene;
+    private User currentUser;
+    private Review selectedReview;
+    private Station selectedStation;
 
     public void start(Stage stage) {
         initializeDao();
@@ -99,9 +102,7 @@ public class GUI2 extends Application {
                 password_label, password_text,
                 error_label, buttons);
 
-        scene = new Scene(vbox);
-
-        return scene;
+        return new Scene(vbox);
     }
 
     private Scene register() {
@@ -220,6 +221,7 @@ public class GUI2 extends Application {
         ObservableList<Station> stations;
         if (stationList != null) {
             stations = FXCollections.observableList(stationList);
+            System.out.println("station list isnt null!!");
         } else stations = null;
         ComboBox<Station> comboBox = new ComboBox<>(stations);
 
@@ -251,6 +253,10 @@ public class GUI2 extends Application {
                             shopping, connection,
                             comment_text.getText(), currentUser.getId());
                     reviewDao.addReview(review);
+                    Stage stage = (Stage) submit.getScene().getWindow();
+                    stage.setScene(passengerLanding());
+                    stage.setTitle("Welcome " + currentUser.getFirstName()
+                            + " " + currentUser.getLastName());
                 }
             } catch (NumberFormatException n) {
                 error.setText("Please ensure that valid ratings have been entered");
@@ -278,18 +284,49 @@ public class GUI2 extends Application {
         TableColumn idCol = new TableColumn("ID");
         idCol.setCellValueFactory(
                 new PropertyValueFactory<Review, Integer>("id"));
+        idCol.setCellFactory(new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn param) {
+                TableCell cell = new TableCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(item != null) {
+                            setText(item.toString());
+                        }
+                    }
+                };
+                cell.setOnMouseClicked(e -> {
+                    if(!cell.isEmpty()) {
+                        int id = (Integer) cell.getItem();
+                        selectedReview = reviewDao.getReviewName(id, currentUser.getId()).get(0);
+                        Stage stage = (Stage) cell.getScene().getWindow();
+                        stage.setScene(editReview());
+                        stage.setTitle("Edit Review: " + selectedReview.getStationName() +
+                                "(Status: " + selectedReview.getApprovalStatus() + ")");
+                    }
+                });
+                return cell;
+            }
+        });
+
         TableColumn stationCol = new TableColumn("Station");
         stationCol.setCellValueFactory(
                 new PropertyValueFactory<Review, String>("station"));
+
         TableColumn shoppingCol = new TableColumn("Shopping");
         shoppingCol.setCellValueFactory(
                 new PropertyValueFactory<Review, Integer>("shopping"));
+
         TableColumn connectionCol = new TableColumn("Connection\nSpeed");
         connectionCol.setCellValueFactory(
                 new PropertyValueFactory<Review, Integer>("connection"));
+
         TableColumn commentCol = new TableColumn("Comment");
         commentCol.setCellValueFactory(
                 new PropertyValueFactory<Review, String>("comment"));
+        commentCol.setSortable(false);
+
         TableColumn statusCol = new TableColumn("Approval\nStatus");
         statusCol.setCellValueFactory(
                 new PropertyValueFactory<Review, String>("status"));
@@ -298,6 +335,94 @@ public class GUI2 extends Application {
         table.getColumns().addAll(idCol, stationCol, shoppingCol,
                 connectionCol, commentCol, statusCol);
         return new Scene(table);
+    }
+
+    private Scene editReview() {
+        Label id_label = new Label();
+        id_label.setText("ID: " + selectedReview.getRid());
+
+        Label shopping_label = new Label();
+        shopping_label.setText("Shopping (1 - 5):");
+        TextField shopping_text = new TextField();
+
+        Label connection_label = new Label();
+        connection_label.setText("Connection Speed (1 - 5):");
+        TextField connection_text = new TextField();
+
+        Label comment_label = new Label();
+        comment_label.setText("Comment:");
+        TextField comment_text = new TextField();
+
+        Label error = new Label();
+
+        Button delete = new Button();
+        delete.setText("Delete Review");
+
+        Button save = new Button();
+        save.setText("Save Review");
+        save.setOnAction(e -> {
+            try {
+                int shopping = Integer.parseInt(shopping_text.getText());
+                int connection = Integer.parseInt(connection_text.getText());
+                // update review here; set status back to pending
+            } catch (NumberFormatException n) {
+                error.setText("Please ensure that valid ratings have been entered");
+            }
+        });
+
+        HBox buttons = new HBox();
+        buttons.getChildren().addAll(delete, save);
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(id_label,
+                shopping_label, shopping_text,
+                connection_label, connection_text,
+                comment_label, comment_text,
+                error, buttons);
+
+        return new Scene(vBox);
+    }
+
+    private Scene stationInfo() {
+        Label address = new Label();
+        address.setText("Address: " + selectedStation.getAddress());
+
+        Label lines = new Label();
+        lines.setText("Lines:");
+
+        Label shopping = new Label();
+        shopping.setText("Average Shopping: ");
+
+        Label connection = new Label();
+        connection.setText("Average Connection Speed: ");
+
+        Label reviews_label = new Label();
+        reviews_label.setText("REVIEWS");
+
+        TableView table = new TableView();
+        TableColumn userCol = new TableColumn("User");
+        userCol.setCellValueFactory(
+                new PropertyValueFactory<Review, String>("user"));
+        userCol.setSortable(false);
+        TableColumn shoppingCol = new TableColumn("Shopping");
+        shoppingCol.setCellValueFactory(
+                new PropertyValueFactory<Review, Integer>("shopping"));
+        shoppingCol.setSortable(false);
+        TableColumn connectionCol = new TableColumn("Connection\nSpeed");
+        connectionCol.setCellValueFactory(
+                new PropertyValueFactory<Review, Integer>("connection"));
+        connectionCol.setSortable(false);
+        TableColumn commentCol = new TableColumn("Comment");
+        commentCol.setCellValueFactory(
+                new PropertyValueFactory<Review, String>("comment"));
+        commentCol.setSortable(false);
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(address, lines,
+                shopping, connection,
+                reviews_label, table);
+
+        return new Scene(vBox);
     }
 
     private void adminLanding() {

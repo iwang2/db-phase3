@@ -31,7 +31,7 @@ public class StationDao {
     
                 stations.add(station);// user.getName();
             }
-            
+            return stations;
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
