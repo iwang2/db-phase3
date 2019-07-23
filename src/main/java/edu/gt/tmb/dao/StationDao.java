@@ -8,6 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.gt.tmb.entity.Line;
 import edu.gt.tmb.entity.Station;
 //import edu.gt.tmb.entity.User;
 import edu.gt.tmb.entity.User;
@@ -63,9 +64,9 @@ public class StationDao {
 	
 	public List<Station> getAllStations() {
 		Connection connection = ConnectionFactory.getConnection();
-        try { 
+        try {
             Statement stmt = connection.createStatement();
-      
+
             ResultSet rs = stmt.executeQuery("SELECT * FROM station");
             List<Station> stations = new ArrayList<>();
             while(rs.next()) //to check if something results from the query
@@ -77,10 +78,10 @@ public class StationDao {
                 station.setAddress( rs.getString("address") ); //these are the database fields from the actual database attributes
                 station.setZipcode( rs.getInt("zipcode") );
                 station.setCity(rs.getString("city"));
-                
-                
-                
-                
+
+
+
+
                 //return user;
                 stations.add(station);
             }

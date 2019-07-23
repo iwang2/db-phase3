@@ -1,10 +1,8 @@
 package edu.gt.tmb.gui;
 
+import com.mysql.cj.xdevapi.Table;
 import edu.gt.tmb.dao.*;
-import edu.gt.tmb.entity.Line;
-import edu.gt.tmb.entity.Review;
-import edu.gt.tmb.entity.Station;
-import edu.gt.tmb.entity.User;
+import edu.gt.tmb.entity.*;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -36,6 +34,7 @@ public class GUI2 extends Application {
     private User currentUser;
     private Review selectedReview;
     private Station selectedStation;
+    private Line selectedLine;
 
     public void start(Stage stage) {
         initializeDao();
@@ -413,8 +412,41 @@ public class GUI2 extends Application {
         Label address = new Label();
         address.setText("Address: " + selectedStation.getAddress());
 
-        Label lines = new Label();
-        lines.setText("Lines:");
+        Label lines_label = new Label();
+        lines_label.setText("Lines:");
+
+        ListView lines_list = new ListView();
+        lines_list.setPrefHeight(80);
+
+        List<StationOnLine> stationList = stationOnLineDao.getStationLineName(selectedStation.getName());
+        ObservableList<StationOnLine> stations = FXCollections.observableList(stationList);
+
+        lines_list.setItems(stations);
+
+        lines_list.setCellFactory(new Callback<ListView, ListCell>() {
+            @Override
+            public ListCell call(ListView param) {
+                ListCell cell = new ListCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(item != null) {
+                            setText(((StationOnLine) item).getLineName());
+                        }
+                    }
+                };
+                cell.setOnMouseClicked(e -> {
+                    if (!cell.isEmpty()) {
+                        String name = ((StationOnLine) cell.getItem()).getLineName();
+                        selectedLine = lineDao.getLine(name).get(0);
+                        Stage stage = (Stage) cell.getScene().getWindow();
+                        stage.setScene(lineSummary());
+                        // set stage name here???
+                    }
+                });
+                return cell;
+            }
+        });
 
         Label shopping = new Label();
         shopping.setText("Average Shopping: " +
@@ -438,7 +470,7 @@ public class GUI2 extends Application {
         ObservableList<Review> reviews =
                 FXCollections.observableList(reviewList);
 
-        TableView table = new TableView();
+        TableView reviews_table = new TableView();
         TableColumn userCol = new TableColumn("User");
         userCol.setCellValueFactory(
                 new PropertyValueFactory<Review, String>("passengerId"));
@@ -459,16 +491,64 @@ public class GUI2 extends Application {
                 new PropertyValueFactory<Review, String>("comment"));
         commentCol.setSortable(false);
 
-        table.setItems(reviews);
-        table.getColumns().addAll(userCol, shoppingCol,
+        reviews_table.setItems(reviews);
+        reviews_table.getColumns().addAll(userCol, shoppingCol,
                 connectionCol, commentCol);
 
         VBox vBox = new VBox();
-        vBox.getChildren().addAll(address, lines,
+        vBox.getChildren().addAll(address, lines_label, lines_list,
                 shopping, connection,
-                reviews_label, table);
+                reviews_label, reviews_table);
 
         return new Scene(vBox);
+    }
+
+    private Scene lineSummary() {
+        TableView table = new TableView();
+        List<StationOnLine> stationList =
+                stationOnLineDao.getLineInfo(selectedLine.getName());
+        ObservableList<StationOnLine> stations =
+                FXCollections.observableList(stationList);
+        table.setItems(stations);
+
+        TableColumn stationCol = new TableColumn("Station");
+        stationCol.setCellValueFactory(
+                new PropertyValueFactory<StationOnLine, String>("stationName")
+        );
+        stationCol.setCellFactory(new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn param) {
+                TableCell cell = new TableCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(item != null) {
+                            setText(item.toString());
+                        }
+                    }
+                };
+                cell.setOnMouseClicked(e -> {
+                    if (!cell.isEmpty()) {
+                        String name = (String) cell.getItem();
+                        selectedStation = stationDao.getStation(name);
+                        Stage stage = (Stage) cell.getScene().getWindow();
+                        stage.setScene(stationInfo());
+                        stage.setTitle(name +
+                                "(Status: " + selectedStation.getStatus() + ")");
+                    }
+                });
+                return cell;
+            }
+        });
+
+        TableColumn orderCol = new TableColumn("Order");
+        orderCol.setCellValueFactory(
+                new PropertyValueFactory<StationOnLine, Integer>("orderNumber")
+        );
+
+        table.getColumns().addAll(stationCol, orderCol);
+
+        return new Scene(table);
     }
 
     private void adminLanding() {

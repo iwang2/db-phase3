@@ -45,8 +45,7 @@ public class StationOnLineDao {
             ResultSet rs = stmt.executeQuery("SELECT line_name, order_number,station_name FROM STATION_ON_LINE WHERE station_name = '"+stationName+"'");
             List<StationOnLine> stols = new ArrayList<>();
             while(rs.next())
-            {	
-            	
+            {
                 StationOnLine stol = new StationOnLine();
                 stol.setLineName( rs.getString("line_name") );
                 stol.setOrderNumber( rs.getInt("order_number") );
@@ -70,7 +69,7 @@ public class StationOnLineDao {
         try { 
             Statement stmt = connection.createStatement();
       
-            ResultSet rs = stmt.executeQuery("SELECT station_name, order_number, line_name FROM STATION_ON_LINE WHERE lineName = '"+lineName+"'");
+            ResultSet rs = stmt.executeQuery("SELECT station_name, order_number, line_name FROM STATION_ON_LINE WHERE line_name = '"+lineName+"'");
             List<StationOnLine> stols = new ArrayList<>();
             while(rs.next()) //to check if something results from the query
             {
@@ -87,7 +86,7 @@ public class StationOnLineDao {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-    return null;
+        return null;
 	}
 	
 	public List<StationOnLine> orderLineStation(String columnName) {
@@ -113,8 +112,7 @@ public class StationOnLineDao {
         }
         return null;
 	}
-	
-	
+
 	public int numberStops(String lineName) {
 		Connection connection = ConnectionFactory.getConnection();
         try {
@@ -261,8 +259,6 @@ public class StationOnLineDao {
         }
         return null;
 	}
-	
-	
 	
 	public boolean deleteStationOnLine(String lineName, String stationName) {
 		//Connector connector = new Connector();

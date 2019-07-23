@@ -6,10 +6,11 @@
 - Passenger Landing
 - Leave Review
 - View Review
+- Line Summary
+- Station Info
 
 ## Completed GUIs
 - Edit Review (submit review button incomplete)
-- Station Info (line linking incomplete)
 
 ## Started GUIs
 
