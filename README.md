@@ -11,6 +11,7 @@
 
 ## Completed GUIs
 - Edit Review (submit review button incomplete)
+- Edit Profile (update not working)
 
 ## Started GUIs
 
@@ -19,3 +20,4 @@
 
 ## Other To-Dos
 - set default review status to pending in the create_table
+- display number of stops in Line Summary

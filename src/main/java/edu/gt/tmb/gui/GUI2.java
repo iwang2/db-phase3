@@ -206,6 +206,11 @@ public class GUI2 extends Application {
 
         Button edit_profile = new Button();
         edit_profile.setText("Edit Profile");
+        edit_profile.setOnAction(e -> {
+            Stage stage = (Stage) edit_profile.getScene().getWindow();
+            stage.setScene(editProfile());
+            stage.setTitle("Edit Profile");
+        });
 
         VBox vBox = new VBox();
         vBox.getChildren().addAll(leave_review, view_reviews, view_trips,
@@ -549,6 +554,102 @@ public class GUI2 extends Application {
         table.getColumns().addAll(stationCol, orderCol);
 
         return new Scene(table);
+    }
+
+    private Scene editProfile() {
+        Label first_label = new Label();
+        first_label.setText("First Name:");
+        TextField first_text = new TextField();
+        first_text.setText(currentUser.getFirstName());
+
+        Label mi_label = new Label();
+        mi_label.setText("Middle Initial:");
+        TextField mi_text = new TextField();
+        mi_text.setText(currentUser.getMinit());
+
+        Label last_label = new Label();
+        last_label.setText("Last Name:");
+        TextField last_text = new TextField();
+        last_text.setText(currentUser.getLastName());
+
+        Label email_label = new Label();
+        email_label.setText("Email:");
+        TextField email_text = new TextField();
+        email_text.setText(currentUser.getPassengerEmail());
+
+        Label userid_label = new Label();
+        userid_label.setText("User ID");
+        TextField userid_text = new TextField();
+        userid_text.setText(currentUser.getId());
+
+        Label password_label = new Label();
+        password_label.setText("Password:");
+        TextField password_text = new TextField();
+        password_text.setText(currentUser.getPassword());
+
+        Label conf_password_label = new Label();
+        conf_password_label.setText("Confirm password:");
+        TextField conf_password_text = new TextField();
+        conf_password_text.setText(currentUser.getPassword());
+
+        Label error = new Label();
+
+        Button delete = new Button();
+        delete.setText("Delete");
+        delete.setOnAction(e -> {
+            if (userDao.deleteUser(currentUser.getId())) {
+                Stage stage = (Stage) delete.getScene().getWindow();
+                stage.setScene(login());
+                stage.setTitle("Login");
+            } else {
+                error.setText("Failed to delete user.");
+            }
+        });
+
+        Button update = new Button();
+        update.setText("Update");
+        update.setOnAction(e -> {
+            if (first_text.getText().equals("") ||
+                    last_text.getText().equals("") ||
+                    email_text.getText().equals("") ||
+                    userid_text.getText().equals("") ||
+                    password_text.getText().equals("")) {
+                error.setText("All fields are required except the middle initial.");
+            } else if (!password_text.getText().equals(conf_password_text.getText())) {
+                error.setText("Passwords do not match.");
+            } else if (password_text.getText().length() < 8) {
+                error.setText("Passwords must be at least 8 characters.");
+            } else {
+                currentUser = new User(userid_text.getText(),
+                        first_text.getText(), mi_text.getText(),
+                        last_text.getText(),
+                        password_text.getText());
+                currentUser.setPassengerEmail(email_text.getText());
+                if (userDao.updateUser(currentUser)) {
+                    Stage stage = (Stage) update.getScene().getWindow();
+                    stage.setScene(passengerLanding());
+                    stage.setTitle("Welcome " + currentUser.getFirstName()
+                            + " " + currentUser.getLastName());
+                } else {
+                    error.setText("User ID must be unique.");
+                }
+            }
+        });
+        HBox buttons = new HBox();
+        buttons.getChildren().addAll(delete, update);
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(
+                first_label, first_text,
+                mi_label, mi_text,
+                last_label, last_text,
+                email_label, email_text,
+                userid_label, userid_text,
+                password_label, password_text,
+                conf_password_label, conf_password_text,
+                error, buttons);
+
+        return new Scene(vBox);
     }
 
     private void adminLanding() {

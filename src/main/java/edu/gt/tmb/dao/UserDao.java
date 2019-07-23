@@ -161,9 +161,9 @@ public class UserDao {
 	        ps.setString(5, user.getPassengerEmail());
 	        ps.setString(6, user.getId());
 	        int i = ps.executeUpdate();
-	      if(i == 1) {
-	    	  return true;
-	      }
+	        if(i == 1) {
+	            return true;
+	        }
 	    } catch (SQLException ex) {
 	        ex.printStackTrace();
 	    }
