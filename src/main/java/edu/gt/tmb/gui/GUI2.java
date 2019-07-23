@@ -1104,4 +1104,40 @@ public class GUI2 extends Application {
 
         return new Scene(vBox);
     }
+
+    private Scene addLine() {
+        Label line_label = new Label();
+        line_label.setText("Line Name");
+        TextField line_text = new TextField();
+
+        Label combo_label = new Label();
+        combo_label.setText("Station");
+        ComboBox<Station> comboBox = new ComboBox<>();
+
+        Label order_label = new Label();
+        order_label.setText("Order");
+        TextField order_text = new TextField();
+
+        Button add_station = new Button();
+        add_station.setText("Add Station");
+
+        TableView table = new TableView();
+
+        TableColumn stationCol = new TableColumn("Station");
+        TableColumn orderCol = new TableColumn("Order");
+
+        table.getColumns().addAll(stationCol, orderCol);
+
+        Button add_line = new Button();
+        add_line.setText("Add Line");
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(
+                line_label, line_text,
+                combo_label, comboBox,
+                order_label, order_text,
+                add_station, table, add_line);
+
+        return new Scene(vBox);
+    }
 }
