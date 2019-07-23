@@ -35,15 +35,15 @@ public class CardDao {
 	    return false;
 	}
 	
-	public List<Card> getValidCard(String uid, Timestamp pdt, int usesleft, Timestamp ed) {
+	public List<Card> getValidCard(String uid, Timestamp pdt, Timestamp ed) {
 		Connection connection = ConnectionFactory.getConnection();
         try { 
         	Date date= new Date();
         	Timestamp ts = new Timestamp(date.getTime()); //may have to define in gui
             Statement stmt = connection.createStatement();
       
-            ResultSet rs = stmt.executeQuery("SELECT type, purchase_date_time FROM CARD "
-            		+ "WHERE user_ID = '"+uid+"' AND purchase_date_time = '"+pdt+"' AND uses_left > 0 AND expiration_date <> '"+ts+"'");
+            ResultSet rs = stmt.executeQuery("SELECT type, expiration_date FROM CARD "
+            		+ "WHERE user_ID = '"+uid+"' AND expiration_date = '"+pdt+"' AND uses_left > 0 AND expiration_date <> '"+ts+"'");
             List<Card> cards = new ArrayList<>();
             while(rs.next()) //to check if something results from the query
             {
@@ -61,7 +61,8 @@ public class CardDao {
         return null;
 	}
 	//UPDATE CARD SET uses_left = "uses_left - 1" WHERE user_ID = "?" AND purchase_date_time = "?";
-	public boolean udpateCard(Card card) {//user you are editing 
+
+	public boolean updateCard(Card card) {//user you are editing
 	    Connection connection = ConnectionFactory.getConnection();
 	    try {
 	    	//UPDATE USER SET first_name = "?", minit = "?", last_name = "?", password = "?", passenger_email = "?" WHERE ID = "?"; 

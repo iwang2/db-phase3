@@ -111,11 +111,12 @@ public class TripDao {
 //        return null;
 //	}
 	
-	public Trip getAllFromID(String id) { //get user trip
+	public List<Trip> getAllFromID(String id) { //get user trip
 		Connection connection = ConnectionFactory.getConnection();
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM trip WHERE user_id='" + id+"'");
+            List<Trip> trips = new ArrayList<>();
             if(rs.next())
             {
                 Trip trip = new Trip();
@@ -126,9 +127,9 @@ public class TripDao {
                 trip.setStartDateTime( rs.getTimestamp("start_date_time") );
                 trip.setToStationName( rs.getString("to_station_name") );
                 trip.setUserId( rs.getString("user_id") );
-                return trip;
+                trips.add(trip);
             }
-            
+            return trips;
         } catch (SQLException ex) {
             ex.printStackTrace();
         }

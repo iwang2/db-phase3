@@ -293,11 +293,11 @@ public class ReviewDao {
 	}
 	
 	//CREATE VIEW pending_reviews AS SELECT passenger_id, station_name, shopping, connection_speed, comment FROM REVIEW WHERE approval_status = "pending";
-	public List<Review> getPendingReview(String status) {
+	public List<Review> getPendingReview() {
 	    Connection connection = ConnectionFactory.getConnection();
 	        try {
 	            Statement stmt = connection.createStatement();
-	            ResultSet rs = stmt.executeQuery("SELECT passenger_id, station_name, shopping, connection_speed, comment FROM REVIEW WHERE approval_status = '" + status +"'");
+	            ResultSet rs = stmt.executeQuery("SELECT passenger_id, station_name, shopping, connection_speed, comment FROM REVIEW WHERE approval_status = 'pending'");
 	            List<Review> reviews = new ArrayList<>();
 	            while(rs.next())
 	            {

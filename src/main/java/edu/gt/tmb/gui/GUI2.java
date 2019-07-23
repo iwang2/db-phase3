@@ -17,6 +17,8 @@ import javafx.util.Callback;
 import sun.management.snmp.util.SnmpTableCache;
 
 import javax.xml.soap.Text;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 public class GUI2 extends Application {
@@ -35,6 +37,7 @@ public class GUI2 extends Application {
     private Review selectedReview;
     private Station selectedStation;
     private Line selectedLine;
+    private Trip currentTrip;
 
     public void start(Stage stage) {
         initializeDao();
@@ -200,6 +203,11 @@ public class GUI2 extends Application {
 
         Button buy_card = new Button();
         buy_card.setText("Buy Card");
+        buy_card.setOnAction(e -> {
+            Stage stage = (Stage) buy_card.getScene().getWindow();
+            stage.setScene(buyCard());
+            stage.setTitle("Buy Card");
+        });
 
         Button go_on_trip = new Button();
         go_on_trip.setText("Go On Trip");
@@ -225,7 +233,6 @@ public class GUI2 extends Application {
         ObservableList<Station> stations;
         if (stationList != null) {
             stations = FXCollections.observableList(stationList);
-            System.out.println("station list isnt null!!");
         } else stations = null;
         ComboBox<Station> comboBox = new ComboBox<>(stations);
 
@@ -652,6 +659,449 @@ public class GUI2 extends Application {
         return new Scene(vBox);
     }
 
-    private void adminLanding() {
+    private Scene buyCard() {
+        Card card = new Card();
+        card.setUserId(currentUser.getId());
+
+        Date date = new Date();
+        Timestamp ts = new Timestamp(date.getTime());
+
+        Button tmes = new Button();
+        tmes.setText("T-mes");
+        tmes.setOnAction(e -> {
+            //card.setExpirationDate();
+        });
+
+        Button t10 = new Button();
+        t10.setText("T-10");
+
+        Button t5030 = new Button();
+        t5030.setText("T-50/30");
+
+        Button tjove = new Button();
+        tjove.setText("T-jove");
+
+        VBox vBox = new VBox();
+        vBox.setAlignment(Pos.CENTER);
+        vBox.getChildren().addAll(tmes, t10, t5030, tjove);
+
+        return new Scene(vBox);
+    }
+
+    private Scene goOnTrip() {
+        Label start_label = new Label();
+        start_label.setText("Start Station");
+
+        ObservableList<Station> stationObservableList =
+                FXCollections.observableList(stationDao.orderStation());
+        ComboBox<Station> stations = new ComboBox<>(stationObservableList);
+
+        Label card_label = new Label();
+        card_label.setText("Card Used");
+
+        //ObservableList<Card> cards = FXCollections.observableList(cardDao.getValidCard())
+        ComboBox<Card> cards = new ComboBox<>();
+
+        Button embark = new Button();
+        embark.setText("Embark");
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(start_label, stations,
+                card_label, cards, embark);
+
+        return new Scene(vBox);
+    }
+
+    private Scene viewTrips() {
+        List<Trip> tripList = tripDao.getAllFromID(currentUser.getId());
+        ObservableList<Trip> trips = FXCollections.observableList(tripList);
+        TableView tableView = new TableView();
+
+        TableColumn startCol = new TableColumn("Start DateTime");
+        startCol.setCellValueFactory(
+                new PropertyValueFactory<Trip, Timestamp>("startDateTime")
+        );
+        startCol.setCellFactory(new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn param) {
+                TableCell cell = new TableCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(item != null) {
+                            setText(item.toString());
+                        }
+                    }
+                };
+                cell.setOnMouseClicked(e -> {
+                    //update trip
+                });
+                return cell;
+            }
+        });
+
+        TableColumn endCol = new TableColumn("End DateTime");
+        endCol.setCellValueFactory(
+                new PropertyValueFactory<Trip, Timestamp>("endDateTime")
+        );
+
+        TableColumn cardCol = new TableColumn("Card Used");
+        cardCol.setCellValueFactory(
+                new PropertyValueFactory<Trip, String>("cardType")
+        );
+
+        TableColumn fromCol = new TableColumn("From");
+        fromCol.setCellValueFactory(
+                new PropertyValueFactory<Trip, String>("fromStationName")
+        );
+        fromCol.setCellFactory(new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn param) {
+                TableCell cell = new TableCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(item != null) {
+                            setText(item.toString());
+                        }
+                    }
+                };
+                cell.setOnMouseClicked(e -> {
+                    if(!cell.isEmpty()) {
+                        String station = (String) cell.getItem();
+                        selectedStation = stationDao.getStation(station);
+                        Stage stage = (Stage) cell.getScene().getWindow();
+                        stage.setScene(stationInfo());
+                        stage.setTitle(station + " (Status: " + selectedStation.getStatus() + ")");
+                    }
+                });
+                return cell;
+            }
+        });
+
+        TableColumn toCol = new TableColumn("To");
+        toCol.setCellValueFactory(
+                new PropertyValueFactory<Trip, String>("toStationName")
+        );
+        toCol.setCellFactory(new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn param) {
+                TableCell cell = new TableCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(item != null) {
+                            setText(item.toString());
+                        }
+                    }
+                };
+                cell.setOnMouseClicked(e -> {
+                    if(!cell.isEmpty()) {
+                        String station = (String) cell.getItem();
+                        selectedStation = stationDao.getStation(station);
+                        Stage stage = (Stage) cell.getScene().getWindow();
+                        stage.setScene(stationInfo());
+                        stage.setTitle(station + " (Status: " + selectedStation.getStatus() + ")");
+                    }
+                });
+                return cell;
+            }
+        });
+
+        tableView.getColumns().addAll(startCol, endCol, cardCol, fromCol, toCol);
+
+        return new Scene(tableView);
+    }
+
+    private Scene updateTrip() {
+        Label start = new Label();
+        start.setText("Start Station:\n" + currentTrip.getFromStationName());
+
+        Label end_label = new Label();
+        end_label.setText("End Station:");
+
+        List<Station> stationList = stationDao.orderStation();
+        ObservableList<Station> stations;
+        if (stationList != null) {
+            stations = FXCollections.observableList(stationList);
+        } else stations = null;
+        ComboBox<Station> comboBox = new ComboBox<>(stations);
+
+        Label card = new Label();
+        card.setText("Card Used:\n" + currentTrip.getCardType() + " (" + currentTrip.getEndDateTime() + ")");
+
+        Button update = new Button();
+        update.setText("Update");
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(start, end_label, comboBox, card, update);
+
+        return new Scene(vBox);
+    }
+
+    private Scene adminLanding() {
+
+        Button view_trips = new Button();
+        view_trips.setText("View Trips");
+
+        Button buy_card = new Button();
+        buy_card.setText("Buy Card");
+        buy_card.setOnAction(e -> {
+            Stage stage = (Stage) buy_card.getScene().getWindow();
+            stage.setScene(buyCard());
+            stage.setTitle("Buy Card");
+        });
+
+        Button go_on_trip = new Button();
+        go_on_trip.setText("Go On Trip");
+
+        Button edit_profile = new Button();
+        edit_profile.setText("Edit Profile");
+        edit_profile.setOnAction(e -> {
+            Stage stage = (Stage) edit_profile.getScene().getWindow();
+            stage.setScene(editProfile());
+            stage.setTitle("Edit Profile");
+        });
+
+        Button add_station = new Button();
+        add_station.setText("Add Station");
+
+        Button add_line = new Button();
+        add_line.setText("Add Line");
+
+        Button review_reviews = new Button();
+        review_reviews.setText("Review Passenger Reviews");
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(view_trips,
+                buy_card, go_on_trip, edit_profile,
+                add_station, add_line, review_reviews);
+        vBox.setAlignment(Pos.CENTER);
+
+        return new Scene(vBox);
+    }
+
+    private Scene reviewReviews() {
+        List<Review> reviewList = reviewDao.getPendingReview();
+        ObservableList<Review> reviews;
+        if (reviewList != null) {
+            reviews = FXCollections.observableList(reviewList);
+        } else reviews = null;
+
+        TableView table = new TableView();
+        TableColumn idCol = new TableColumn("User");
+        idCol.setCellValueFactory(
+                new PropertyValueFactory<Review, Integer>("passengerID"));
+        idCol.setCellFactory(new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn param) {
+                TableCell cell = new TableCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(item != null) {
+                            setText(item.toString());
+                        }
+                    }
+                };
+                cell.setOnMouseClicked(e -> {
+                    if(!cell.isEmpty()) {
+                        // approve/reject review page
+                    }
+                });
+                return cell;
+            }
+        });
+
+        TableColumn stationCol = new TableColumn("Station");
+        stationCol.setCellValueFactory(
+                new PropertyValueFactory<Review, String>("stationName"));
+        stationCol.setCellFactory(new Callback<TableColumn, TableCell>() {
+            @Override
+            public TableCell call(TableColumn param) {
+                TableCell cell = new TableCell() {
+                    @Override
+                    protected void updateItem(Object item, boolean empty) {
+                        super.updateItem(item, empty);
+                        if(item != null) {
+                            setText(item.toString());
+                        }
+                    }
+                };
+                cell.setOnMouseClicked(e -> {
+                    if(!cell.isEmpty()) {
+                        String station = (String) cell.getItem();
+                        selectedStation = stationDao.getStation(station);
+                        Stage stage = (Stage) cell.getScene().getWindow();
+                        stage.setScene(stationInfo());
+                        stage.setTitle(station + "(Status: " + selectedStation.getStatus() + ")");
+                    }
+                });
+                return cell;
+            }
+        });
+
+        TableColumn shoppingCol = new TableColumn("Shopping");
+        shoppingCol.setCellValueFactory(
+                new PropertyValueFactory<Review, Integer>("shopping"));
+
+        TableColumn connectionCol = new TableColumn("Connection\nSpeed");
+        connectionCol.setCellValueFactory(
+                new PropertyValueFactory<Review, Integer>("connectionSpeed"));
+
+        TableColumn commentCol = new TableColumn("Comment");
+        commentCol.setCellValueFactory(
+                new PropertyValueFactory<Review, String>("comment"));
+        commentCol.setSortable(false);
+
+        table.setItems(reviews);
+        table.getColumns().addAll(idCol, stationCol, shoppingCol,
+                connectionCol, commentCol);
+
+        return new Scene(table);
+    }
+
+    private Scene editAdminProfile() {
+        Label first_label = new Label();
+        first_label.setText("First Name:");
+        TextField first_text = new TextField();
+        first_text.setText(currentUser.getFirstName());
+
+        Label mi_label = new Label();
+        mi_label.setText("Middle Initial:");
+        TextField mi_text = new TextField();
+        mi_text.setText(currentUser.getMinit());
+
+        Label last_label = new Label();
+        last_label.setText("Last Name:");
+        TextField last_text = new TextField();
+        last_text.setText(currentUser.getLastName());
+
+        Label userid_label = new Label();
+        userid_label.setText("User ID");
+        TextField userid_text = new TextField();
+        userid_text.setText(currentUser.getId());
+
+        Label password_label = new Label();
+        password_label.setText("Password:");
+        TextField password_text = new TextField();
+        password_text.setText(currentUser.getPassword());
+
+        Label conf_password_label = new Label();
+        conf_password_label.setText("Confirm password:");
+        TextField conf_password_text = new TextField();
+        conf_password_text.setText(currentUser.getPassword());
+
+        Label error = new Label();
+
+        Button delete = new Button();
+        delete.setText("Delete");
+        delete.setOnAction(e -> {
+            if (userDao.deleteUser(currentUser.getId())) {
+                Stage stage = (Stage) delete.getScene().getWindow();
+                stage.setScene(login());
+                stage.setTitle("Login");
+            } else {
+                error.setText("Failed to delete user.");
+            }
+        });
+
+        Button update = new Button();
+        update.setText("Update");
+        update.setOnAction(e -> {
+            if (first_text.getText().equals("") ||
+                    last_text.getText().equals("") ||
+                    userid_text.getText().equals("") ||
+                    password_text.getText().equals("")) {
+                error.setText("All fields are required except the middle initial.");
+            } else if (!password_text.getText().equals(conf_password_text.getText())) {
+                error.setText("Passwords do not match.");
+            } else if (password_text.getText().length() < 8) {
+                error.setText("Passwords must be at least 8 characters.");
+            } else {
+                currentUser = new User(userid_text.getText(),
+                        first_text.getText(), mi_text.getText(),
+                        last_text.getText(),
+                        password_text.getText());
+                if (userDao.updateUser(currentUser)) {
+                    Stage stage = (Stage) update.getScene().getWindow();
+                    stage.setScene(adminLanding());
+                    stage.setTitle("Welcome " + currentUser.getFirstName()
+                            + " " + currentUser.getLastName());
+                } else {
+                    error.setText("User ID must be unique.");
+                }
+            }
+        });
+        HBox buttons = new HBox();
+        buttons.getChildren().addAll(delete, update);
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(
+                first_label, first_text,
+                mi_label, mi_text,
+                last_label, last_text,
+                userid_label, userid_text,
+                password_label, password_text,
+                conf_password_label, conf_password_text,
+                error, buttons);
+
+        return new Scene(vBox);
+    }
+
+    private Scene addStation() {
+        Label name_label = new Label();
+        name_label.setText("Station Name");
+        TextField name_text = new TextField();
+
+        Label address_label = new Label();
+        address_label.setText("Street Address");
+        TextField address_text = new TextField();
+
+        Label city_label = new Label();
+        city_label.setText("City");
+        TextField city_text = new TextField();
+
+        Label state_label = new Label();
+        state_label.setText("State/Province");
+        TextField state_text = new TextField();
+
+        Label zip_label = new Label();
+        zip_label.setText("Postal/Zip Code");
+        TextField zip_text = new TextField();
+
+        Label line_combo_label = new Label();
+        line_combo_label.setText("Line");
+        ComboBox<Line> lineComboBox = new ComboBox<>();
+
+        Label order_label = new Label();
+        order_label.setText("Order");
+        TextField order_text = new TextField();
+
+        Button add_line = new Button();
+        add_line.setText("Add Line");
+
+        TableView table = new TableView();
+
+        TableColumn lineCol = new TableColumn("Line");
+        TableColumn orderCol = new TableColumn("Order");
+
+        table.getColumns().addAll(lineCol, orderCol);
+
+        Button add_station = new Button();
+        add_line.setText("Add Station");
+
+        VBox vBox = new VBox();
+        vBox.getChildren().addAll(
+                name_label, name_text,
+                address_label, address_text,
+                city_label, city_text,
+                state_label, state_text,
+                zip_label, zip_text,
+                line_combo_label, lineComboBox,
+                order_label, order_text,
+                add_line, table, add_station);
+
+        return new Scene(vBox);
     }
 }
